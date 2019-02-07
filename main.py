@@ -11,20 +11,15 @@ def testMt(n):
         print(rng.getRandomNumber())
 
 
-def testUntwist():
-    shift = 18
-    testWord = 0x1234abcd
-    testWord ^= testWord >> shift
-    result = untwist.reverseRightShiftXor(testWord, shift)
-    hprint(result)
+def testUntwist(n):
+    mtref = mersenneTwister.Mt()
+    values = getNumbers(mtref, 624)
+    state = untwist.reverseState(values)
+    mthack = mersenneTwister.Mt()
+    mthack.reinitState(state)
 
-    testWord = 0xdeadbeef
-    mask = 0xae12ab32
-    shift = 16
-    testWord ^= (testWord << shift) & mask
-    result = untwist.reverseLeftShiftXor(testWord, shift, mask)
-    hprint(result)
-
+    for i in range(n):
+        print(mtref.getRandomNumber(), "==", mthack.getRandomNumber(), " !!!")
 
 
 def getNumbers(rng, n):
@@ -35,6 +30,4 @@ def getNumbers(rng, n):
 
 if __name__ == "__main__":
     #testMT(10)
-    mt = mersenneTwister.Mt()
-    values = getNumbers(mt, 624)
-    testUntwist()
+    testUntwist(10)

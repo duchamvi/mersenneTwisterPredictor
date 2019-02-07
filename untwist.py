@@ -31,4 +31,12 @@ def reverseLeftShiftXor(number, shift, mask):
         stateWord ^= (shiftmask & number)^stepmask # XOR of copied bits
     return stateWord
 
+def reverseWord(number):
+    number = reverseRightShiftXor(number, 18)
+    number = reverseLeftShiftXor(number, 15, 0xEFC60000)
+    number = reverseLeftShiftXor(number, 7, 0x9D2C5680)
+    number = reverseRightShiftXor(number, 11)
+    return number
 
+def reverseState(numbers):
+    return [reverseWord(w) for w in numbers]
