@@ -23,6 +23,10 @@ class Mt(object):
 		for i in range(1,624):
 			self.state[i] = self.int_32(self.f*(self.state[i-1]^(self.state[i-1]>>30)) + i)
 
+	def reinitState(self, newstate):
+		self.state = newstate
+		self.index = 624
+
 	def twist(self):
 		for i in range(624):
 			temp = self.int_32((self.state[i]&self.upper_mask)+(self.state[(i+1)%624]&self.lower_mask))
