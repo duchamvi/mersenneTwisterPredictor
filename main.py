@@ -12,10 +12,19 @@ def testMt(n):
 
 
 def testUntwist():
+    shift = 18
     testWord = 0x1234abcd
-    testWord ^= testWord >> 18
-    result = untwist.reverseRightShiftXor(testWord, 18)
+    testWord ^= testWord >> shift
+    result = untwist.reverseRightShiftXor(testWord, shift)
     hprint(result)
+
+    testWord = 0xdeadbeef
+    mask = 0xae12ab32
+    shift = 16
+    testWord ^= (testWord << shift) & mask
+    result = untwist.reverseLeftShiftXor(testWord, shift, mask)
+    hprint(result)
+
 
 
 def getNumbers(rng, n):
