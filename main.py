@@ -5,18 +5,23 @@ import random
 def hprint(n):
     print(hex(n))
 
+def twist(y):
+    y = y^(y>>11)
+    y = y^((y<<7)&0x9D2C5680)
+    y = y^((y<<15)&0xEFC60000)
+    y = y^(y>>18)
+    return y   
+
+def computeNextstate(old1, old2, old3):
+    return old1 ^ old2 ^ old3 # to change
+
 def testMt(n):
     rng = mersenneTwister.Mt()
     
     for i in range(n):
         print(rng.getRandomNumber())
 
-def twist(y):
-    y = y^(y>>11)
-    y = y^((y<<7)&0x9D2C5680)
-    y = y^((y<<15)&0xEFC60000)
-    y = y^(y>>18)
-    return y    
+ 
 
 def testUntwist(n):
     mtref = mersenneTwister.Mt()
@@ -77,25 +82,49 @@ def createState_OutputTable():
         print("o{} : {}".format(i, l))
     return sotable    
 
-def tabletwist(state, sotable):
-    tableword = 0    
+def applytable(input, table):  
+    # sotable for state to output
+    result = 0    
     for i in range (32):
         ref = 0x1 << i
-        for statebit in sotable[i]:
-            if state & (0x1 << statebit) != 0x0:
-                tableword ^= ref         
-    return tableword    
+        for inputbit in table[i]:
+            if input & (0x1 << inputbit) != 0x0:
+                result ^= ref         
+    return result    
+
+
+def test_bruteforce3k(nbUnknownBits = 7):
+    output1 = 0x12345678 & 0x00ffffff
+    output2 = 0x12345678 & 0x00ffffff
+    output3 = 0x12345678 & 0x00ffffff
+
+    extensions = []
+    for i in range(2**(nbUnknownBits)):
+        extensions.append(i << 32 - nbUnknownBits)
+
+    for ex1 in extensions:
+        state1 = untwist.reverseWord(output1^ex1)
+        for ex2 in extensions:
+            state2 = untwist.reverseWord(output2^ex2)
+            for ex3 in extensions:
+                state3 = untwist.reverseWord(output3^ex3)
+
+                nextstate = computeNextstate(state1, state2, state3)
+                word = twist(nextstate)
+                hprint(word)
+    print("done")
+
 
 if __name__ == "__main__":
     # testMT(10)
     # testUntwist(10)
     #testUntwistPyrand(10)
-    sotable = createState_OutputTable()
-    
-    state = 0x12345a78
-    word = twist(state)
-    tableword = tabletwist(state, sotable)   
 
-    print("Test state", hex(state)," ->", hex(word) , " sotable -> ", hex(tableword))
+    #sotable = createState_OutputTable()
+    #state = 0x12345a78
+    #word = twist(state)
+    #tableword = applytable(state, sotable)   
+    #print("Test state", hex(state)," ->", hex(word) , " sotable -> ", hex(tableword))
 
+    test_bruteforce3k()
 
