@@ -48,7 +48,7 @@ def getNumbers(rng, n):
 def testTrunc():
     ref = twist(0) & 0x000000ff
     hprint(ref)
-    for i in range (32*8):  
+    for i in range (32):  
         state  = 1 * (2**i) 
         number = twist(state) & 0xffffffff
         if number !=0:
@@ -56,8 +56,47 @@ def testTrunc():
 
 
 
+def findBitTravel():
+    # so : state-output (find wich bit of output give which bit of state)
+    soMask = twist(0x00000000)    
+    print("So Mask", hex(soMask))
+    sotable = [[] for _ in range (32)] 
+
+    for i in range (32):
+        state  = 0x1 << i
+        word = twist(state)
+        print("So state", hex(state)," ->", hex(word))
+
+        # register bits of state
+        for bit in range(32):
+            ref = 0x1 << bit
+            if ref & word != 0x0:
+                sotable[bit].append(i)
+
+    for (i, l) in enumerate(sotable):
+        print("o{} : {}".format(i, l))
+    return sotable    
+
+    
+
+
+
 if __name__ == "__main__":
     # testMT(10)
     # testUntwist(10)
-    # testTrunc()
-    testUntwistPyrand(10)
+    #testUntwistPyrand(10)
+    sotable = findBitTravel()
+    
+    state = 0x12345678
+    word = twist(state)
+        
+    tableword = 0    
+    for i in range (32):
+        ref = 0x1 << i
+        for statebit in sotable[i]:
+            if state & (0x1 << statebit) != 0x0:
+                tableword ^= ref    
+
+    print("Test state", hex(state)," ->", hex(word) , " sotable -> ", hex(tableword))
+
+
