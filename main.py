@@ -56,7 +56,7 @@ def testTrunc():
 
 
 
-def findBitTravel():
+def createState_OutputTable():
     # so : state-output (find wich bit of output give which bit of state)
     soMask = twist(0x00000000)    
     print("So Mask", hex(soMask))
@@ -77,25 +77,24 @@ def findBitTravel():
         print("o{} : {}".format(i, l))
     return sotable    
 
-    
-
-
-
-if __name__ == "__main__":
-    # testMT(10)
-    # testUntwist(10)
-    #testUntwistPyrand(10)
-    sotable = findBitTravel()
-    
-    state = 0x12345678
-    word = twist(state)
-        
+def tabletwist(state, sotable):
     tableword = 0    
     for i in range (32):
         ref = 0x1 << i
         for statebit in sotable[i]:
             if state & (0x1 << statebit) != 0x0:
-                tableword ^= ref    
+                tableword ^= ref         
+    return tableword    
+
+if __name__ == "__main__":
+    # testMT(10)
+    # testUntwist(10)
+    #testUntwistPyrand(10)
+    sotable = createState_OutputTable()
+    
+    state = 0x12345a78
+    word = twist(state)
+    tableword = tabletwist(state, sotable)   
 
     print("Test state", hex(state)," ->", hex(word) , " sotable -> ", hex(tableword))
 
