@@ -5,7 +5,7 @@ import random
 def hprint(n):
     print(hex(n))
 
-def twist(y):
+def extract(y):
     y = y^(y>>11)
     y = y^((y<<7)&0x9D2C5680)
     y = y^((y<<15)&0xEFC60000)
@@ -51,11 +51,11 @@ def getNumbers(rng, n):
 
 
 def testTrunc():
-    ref = twist(0) & 0x000000ff
+    ref = extract(0) & 0x000000ff
     hprint(ref)
     for i in range (32):  
         state  = 1 * (2**i) 
-        number = twist(state) & 0xffffffff
+        number = extract(state) & 0xffffffff
         if number !=0:
             print("{} : {}".format(i, hex(number))) 
 
@@ -63,13 +63,13 @@ def testTrunc():
 
 def createState_OutputTable():
     # so : state-output (find wich bit of output give which bit of state)
-    soMask = twist(0x00000000)    
+    soMask = extract(0x00000000)    
     print("So Mask", hex(soMask))
     sotable = [[] for _ in range (32)] 
 
     for i in range (32):
         state  = 0x1 << i
-        word = twist(state)
+        word = extract(state)
         print("So state", hex(state)," ->", hex(word))
 
         # register bits of state
@@ -93,10 +93,9 @@ def applytable(input, table):
     return result    
 
 
-def test_bruteforce3k(nbUnknownBits = 7):
+def test_bruteforce2k(nbUnknownBits = 8):
     output1 = 0x12345678 & 0x00ffffff
     output2 = 0x12345678 & 0x00ffffff
-    output3 = 0x12345678 & 0x00ffffff
 
     extensions = []
     for i in range(2**(nbUnknownBits)):
@@ -106,25 +105,22 @@ def test_bruteforce3k(nbUnknownBits = 7):
         state1 = untwist.reverseWord(output1^ex1)
         for ex2 in extensions:
             state2 = untwist.reverseWord(output2^ex2)
-            for ex3 in extensions:
-                state3 = untwist.reverseWord(output3^ex3)
-
-                nextstate = computeNextstate(state1, state2, state3)
-                word = twist(nextstate)
-                hprint(word)
+            nextstate = computeNextstate(state1, state2, 0x12345678)
+            word = extract(nextstate)
+            #hprint(word)
     print("done")
 
 
 if __name__ == "__main__":
     # testMT(10)
     # testUntwist(10)
-    #testUntwistPyrand(10)
+    testUntwistPyrand(10)
 
     #sotable = createState_OutputTable()
     #state = 0x12345a78
-    #word = twist(state)
+    #word = extract(state)
     #tableword = applytable(state, sotable)   
     #print("Test state", hex(state)," ->", hex(word) , " sotable -> ", hex(tableword))
 
-    test_bruteforce3k()
+    test_bruteforce2k()
 
