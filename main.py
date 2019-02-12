@@ -111,10 +111,25 @@ def test_bruteforce2k(nbUnknownBits = 8):
     print("done")
 
 
+def test_bruteforcek(nbUnknownBits = 8):
+    output1 = 0x12345678 & 0x00ffffff
+
+    extensions = []
+    for i in range(2**(nbUnknownBits)):
+        extensions.append(i << 32 - nbUnknownBits)
+
+    for ex1 in extensions:
+        state1 = untwist.reverseWord(output1^ex1)
+        nextstate = computeNextstate(state1, 0x12345678, 0x12345678)
+        word = extract(nextstate)
+        #hprint(word)
+    print("done")
+
+
 if __name__ == "__main__":
     # testMT(10)
     # testUntwist(10)
-    testUntwistPyrand(10)
+    # testUntwistPyrand(10)
 
     #sotable = createState_OutputTable()
     #state = 0x12345a78
@@ -122,5 +137,11 @@ if __name__ == "__main__":
     #tableword = applytable(state, sotable)   
     #print("Test state", hex(state)," ->", hex(word) , " sotable -> ", hex(tableword))
 
-    test_bruteforce2k()
+    print("start")
+    for i in range (228):
+        test_bruteforce2k()
+    for i in range(228, 624):
+        test_bruteforcek()
+
+    print("All done")
 
